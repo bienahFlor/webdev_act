@@ -26,11 +26,6 @@
             align-items: center;
         }
 
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
         h2 {
             color: #333;
         }
@@ -47,20 +42,6 @@
 
         .add-button:hover {
             background-color: #45a049;
-        }
-
-        .logout-button {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            font-size: 14px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .logout-button:hover {
-            background-color: #d32f2f;
         }
 
         table {
@@ -98,6 +79,7 @@
             color: #155724;
         }
 
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -178,37 +160,6 @@
         .submit-btn:hover {
             background-color: #45a049;
         }
-
-        .action-btns {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .edit-btn {
-            background-color: #007bff;
-        }
-
-        .edit-btn:hover {
-            background-color: #0069d9;
-        }
-
-        .delete-btn {
-            background-color: #dc3545;
-        }
-
-        .delete-btn:hover {
-            background-color: #c82333;
-        }
-
-        .edit-btn, .delete-btn {
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            font-size: 13px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -216,13 +167,7 @@
 <div class="container">
     <div class="header">
         <h2>Student List</h2>
-        <div class="header-buttons">
-            <button class="add-button" onclick="openModal()">+ Add Student</button>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="logout-button">Logout</button>
-            </form>
-        </div>
+        <button class="add-button" onclick="openModal()">+ Add Student</button>
     </div>
 
     @if(session('success'))
@@ -241,26 +186,17 @@
                     <th>Last Name</th>
                     <th>Age</th>
                     <th>Birthdate</th>
-                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($students as $stu)
+                @foreach($students as $student)
                     <tr>
-                        <td>{{ $stu->id }}</td>
-                        <td>{{ $stu->firstname }}</td>
-                        <td>{{ $stu->middlename }}</td>
-                        <td>{{ $stu->lastname }}</td>
-                        <td>{{ $stu->age }}</td>
-                        <td>{{ $stu->birthdate }}</td>
-                        <td class="action-btns">
-                            <button class="edit-btn" onclick='editStudent(@json($stu))'>Edit</button>
-                            <form action="{{ route('student.destroy', $stu->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="delete-btn" onclick="return confirm('Are you sure?')">Delete</button>
-                            </form>
-                        </td>
+                        <td>{{ $student->id }}</td>
+                        <td>{{ $student->firstname }}</td>
+                        <td>{{ $student->middlename }}</td>
+                        <td>{{ $student->lastname }}</td>
+                        <td>{{ $student->age }}</td>
+                        <td>{{ $student->birthdate }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -272,29 +208,28 @@
 <div id="studentModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
-        <h3 style="text-align:center; margin-bottom: 20px;" id="modalTitle">Add Student</h3>
-        <form method="POST" id="studentForm">
+        <h3 style="text-align:center; margin-bottom: 20px;">Add Student</h3>
+        <form method="POST" action="{{ route('student.store') }}">
             @csrf
-            <input type="hidden" name="_method" id="formMethod" value="POST">
             <div>
                 <label>First Name</label>
-                <input type="text" name="firstname" id="firstname" required>
+                <input type="text" name="firstname" required>
             </div>
             <div>
                 <label>Middle Name</label>
-                <input type="text" name="middlename" id="middlename">
+                <input type="text" name="middlename">
             </div>
             <div>
                 <label>Last Name</label>
-                <input type="text" name="lastname" id="lastname" required>
+                <input type="text" name="lastname" required>
             </div>
             <div>
                 <label>Age</label>
-                <input type="number" name="age" id="age" required>
+                <input type="number" name="age" required>
             </div>
             <div>
                 <label>Birthdate</label>
-                <input type="date" name="birthdate" id="birthdate" required>
+                <input type="date" name="birthdate" required>
             </div>
             <button type="submit" class="submit-btn">Save Student</button>
         </form>
@@ -302,38 +237,19 @@
 </div>
 
 <script>
-    const modal = document.getElementById('studentModal');
-    const form = document.getElementById('studentForm');
-    const method = document.getElementById('formMethod');
-    const title = document.getElementById('modalTitle');
-
     function openModal() {
-        form.reset();
-        title.innerText = "Add Student";
-        form.action = "{{ route('student.store') }}";
-        method.value = "POST";
-        modal.style.display = 'block';
-    }
-
-    function editStudent(student) {
-        openModal();
-        title.innerText = "Edit Student";
-        form.action = `/students/${student.id}/update`;
-        method.value = "POST";
-        document.getElementById('firstname').value = student.firstname;
-        document.getElementById('middlename').value = student.middlename;
-        document.getElementById('lastname').value = student.lastname;
-        document.getElementById('age').value = student.age;
-        document.getElementById('birthdate').value = student.birthdate;
+        document.getElementById('studentModal').style.display = 'block';
     }
 
     function closeModal() {
-        modal.style.display = 'none';
+        document.getElementById('studentModal').style.display = 'none';
     }
 
+    // Optional: Close modal when clicking outside
     window.onclick = function(event) {
+        const modal = document.getElementById('studentModal');
         if (event.target == modal) {
-            closeModal();
+            modal.style.display = "none";
         }
     }
 </script>

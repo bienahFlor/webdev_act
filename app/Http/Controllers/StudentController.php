@@ -7,34 +7,27 @@ use App\Models\Student;
 
 class StudentController extends Controller
 {
-    // ✅ Correct place to put middleware
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
-    public function index()
-    {
-        $students = Student::all();
-        return view('student', compact('students'));
-    }
-
+    // Show the create student form
     public function create()
     {
         $students = Student::all();
         return view('student', compact('students'));
     }
 
+
+    // Handle form submission and save to database
     public function store(Request $request)
     {
+        // Validate input data
         $request->validate([
             'firstname' => 'required|string|max:255',
             'middlename' => 'nullable|string|max:255',
-            'lastname'  => 'required|string|max:255',
-            'age'       => 'required|integer|min:0',
+            'lastname' => 'required|string|max:255',
+            'age' => 'required|integer|min:0',
             'birthdate' => 'required|date',
         ]);
 
+        // Save the data to the database
         Student::create([
             'firstname' => $request->firstname,
             'middlename' => $request->middlename,
@@ -43,29 +36,7 @@ class StudentController extends Controller
             'birthdate' => $request->birthdate,
         ]);
 
-        return redirect()->route('student.index')->with('success', 'Student created successfully!');
-    }
-
-    public function edit($id)
-    {
-        $student = Student::findOrFail($id);
-        $students = Student::all();
-        return view('student', compact('student', 'students'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $student = Student::findOrFail($id);
-        $student->update($request->only(['firstname', 'middlename', 'lastname', 'age', 'birthdate']));
-
-        return redirect()->route('student.index')->with('success', 'Student updated successfully.');
-    }
-
-    public function destroy($id)
-    {
-        $student = Student::findOrFail($id);
-        $student->delete();
-
-        return redirect()->route('student.index')->with('success', 'Student deleted successfully.');
+        // Redirect back with a success message
+        return redirect()->back()->with('success', 'Student created successfully!');
     }
 }
